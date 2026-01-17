@@ -289,15 +289,15 @@ function shareData(){
 
 renderList();
 // Register Service Worker for PWA
-if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js')
-      .then(reg => console.log('PWA Service Worker Registered'))
-      .catch(err => console.log('Service Worker Registration Failed', err));
+    navigator.serviceWorker.register('sw.js');
   });
 }
+  
 </script>
 </body>
 
 </html>
+
 
