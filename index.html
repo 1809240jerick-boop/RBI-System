@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>RBI System | SEC JERICK</title>
+
+<meta name="theme-color" content="#0a3d62">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="RBI System">
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<style>
+/* HARD RESET & MOBILE STYLES */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', sans-serif; background: #eef1f5; -webkit-tap-highlight-color: transparent; }
+
+.app {
+  max-width: 380px; /* TRUE PHONE WIDTH */
+  margin: 0 auto;
+  background: #ffffff;
+  min-height: 100vh;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+header {
+  background: #0a3d62;
+  color: #ffffff;
+  padding: 16px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+h3 { margin: 0; font-size: 18px; }
+small { opacity: 0.8; font-size: 12px; }
+
+.section { padding: 16px; border-bottom: 8px solid #f0f2f5; }
+
+.form-group { width: 100%; margin-bottom: 14px; }
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-size: 15px;
+  background: #fff;
+}
+
+input:focus, select:focus { border-color: #0a3d62; outline: none; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 8px;
+  background: #1e90ff;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+button:active { transform: scale(0.98); }
+
+/* Button Colors */
+button.secondary { background: #27ae60; } /* Excel Green */
+button.drive { background: #f1c40f; color: #333; } /* Drive Yellow */
+button.share { background: #8e44ad; } /* Share Purple */
+
+.list { margin-top: 10px; }
+.card {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.card span { font-weight: 500; }
+.card small { color: #888; }
+
+footer {
+  text-align: center;
+  font-size: 12px;
+  padding: 20px;
+  color: #666;
+  background: #f8f9fa;
+}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <h3>RBI System</h3>
+  <small>Barangay Inhabitant Registration</small>
+</header>
+
+<div class="section">
+  <div class="form-group"><label>Inhabitant Type</label><select id="inhabitantType"><option>NON-MIGRANT</option><option>MIGRANT</option><option>TRANSIENT</option></select></div>
+  <div class="form-group"><label>Last Name</label><input id="lastName" placeholder="e.g. Dela Cruz"></div>
+  <div class="form-group"><label>First Name</label><input id="firstName" placeholder="e.g. Juan"></div>
+  <div class="form-group"><label>Middle Name</label><input id="middleName"></div>
+  <div class="form-group"><label>Suffix</label><input id="suffix" placeholder="e.g. Jr, III"></div>
+  <div class="form-group"><label>Birth Place</label><input id="birthPlace"></div>
+  <div class="form-group"><label>Birthday</label><input type="date" id="birthDate"></div>
+  <div class="form-group"><label>Sex</label><select id="sex"><option>MALE</option><option>FEMALE</option></select></div>
+  <div class="form-group"><label>Civil Status</label><select id="civilStatus"><option>SINGLE</option><option>MARRIED</option><option>WIDOWED</option><option>SEPARATED</option><option>COMMON LAW/ LIVE-IN</option></select></div>
+  <div class="form-group"><label>Citizenship</label><input id="citizenship" value="FILIPINO"></div>
+  <div class="form-group"><label>Profession / Occupation</label><input id="profession"></div>
+  <div class="form-group"><label>Contact Number</label><input id="contact" type="tel"></div>
+  <div class="form-group"><label>Email Address</label><input id="email" type="email"></div>
+  <div class="form-group"><label>Educational Attainment</label><select id="education"><option>NONE</option><option>ELEMENTARY</option><option>HIGH SCHOOL</option><option>SENIOR HIGH SCHOOL</option><option>COLLEGE</option><option>VOCATIONAL</option><option>POST GRADUATE</option></select></div>
+  
+  <div style="margin-top:15px; border-top:1px dashed #ccc; padding-top:10px;">
+      <label style="color:#0a3d62;">Mother's Maiden Name</label>
+      <div class="form-group"><input id="mFirst" placeholder="Mother's First Name"></div>
+      <div class="form-group"><input id="mMiddle" placeholder="Mother's Middle Name"></div>
+      <div class="form-group"><input id="mLast" placeholder="Mother's Last Name"></div>
+  </div>
+
+  <button onclick="saveRecord()">SAVE RECORD</button>
+</div>
+
+<div class="section">
+  <div class="form-group">
+      <label>Search Database</label>
+      <input id="searchBox" oninput="renderList()" placeholder="Type last name...">
+  </div>
+  <div class="list" id="resultList"></div>
+  
+  <button class="share" onclick="shareData()">Share System</button>
+</div>
+
+<div class="section">
+  <label>Export Data</label>
+  <p style="font-size:12px; color:#666; margin-bottom:10px;">
+      Downloads the official format immediately (Sheet 1: Instructions, Sheet 2: Data).
+  </p>
+  
+  <button class="secondary" onclick="exportExcel()">Export Excel File</button>
+  <button class="drive" onclick="openDrive()">Open Google Drive</button>
+</div>
+
+<footer>© SEC JERICK™ | Modern RBI System</footer>
+</div>
+
+<script>
+// --- 1. SETUP HEADERS EXACTLY AS REQUESTED ---
+const HEADERS = [
+    "INHABITANT TYPE", "LAST NAME", "FIRST NAME", "MIDDLE NAME", "SUFFIX", 
+    "BIRTH PLACE", "BIRTHDATE (YYYY-MM-DD)", "SEX", "CIVIL STATUS", "CITIZENSHIP", 
+    "PROFESSION/ OCCUPATION", "CONTACT NUMBER", "EMAIL ADDRESS", 
+    "HIGHEST EDUCATIONAL ATTAINMENT", "MOTHER'S FIRST NAME", 
+    "MOTHER'S MIDDLE NAME", "MOTHER'S LAST NAME"
+];
+
+let records = JSON.parse(localStorage.getItem('rbiRecords')) || [];
+
+function saveRecord(){
+  if(!lastName.value || !firstName.value){ alert('Last and First Name required'); return; }
+  
+  // Format matches the columns exactly
+  const newRow = [
+    inhabitantType.value,
+    lastName.value.toUpperCase(),
+    firstName.value.toUpperCase(),
+    middleName.value.toUpperCase(),
+    suffix.value.toUpperCase(),
+    birthPlace.value.toUpperCase(),
+    birthDate.value,
+    sex.value,
+    civilStatus.value,
+    citizenship.value.toUpperCase(),
+    profession.value.toUpperCase(),
+    contact.value,
+    email.value,
+    education.value,
+    mFirst.value.toUpperCase(),
+    mMiddle.value.toUpperCase(),
+    mLast.value.toUpperCase()
+  ];
+
+  records.push(newRow);
+  localStorage.setItem('rbiRecords', JSON.stringify(records));
+  
+  alert('Record Saved!');
+  
+  // Clear core fields
+  lastName.value = ''; firstName.value = ''; middleName.value = ''; 
+  renderList();
+}
+
+function renderList(){
+  const q = searchBox.value.toLowerCase();
+  resultList.innerHTML = '';
+  
+  const filtered = records.filter(r => r[1].toLowerCase().includes(q));
+  
+  if(filtered.length === 0 && q.length > 0) {
+      resultList.innerHTML = '<div style="text-align:center; padding:10px; color:#999;">No records found</div>';
+      return;
+  }
+
+  filtered.forEach((r) => {
+    const div = document.createElement('div');
+    div.className = 'card';
+    div.innerHTML = `
+        <span>${r[1]}, ${r[2]} <small>(${r[6]})</small></span>
+        <small style="color:#0a3d62">${r[0]}</small>
+    `;
+    resultList.appendChild(div);
+  });
+}
+
+// --- 2. NEW EXPORT FUNCTION (NO FILE IMPORT NEEDED) ---
+function exportExcel(){
+  if(records.length === 0){ alert("No records to export."); return; }
+
+  // Create a new Workbook
+  const wb = XLSX.utils.book_new();
+
+  // SHEET 1: INSTRUCTIONS (Placeholders to match template structure)
+  const instructionData = [
+      ["INSTRUCTIONS"],
+      ["This file was generated by SEC JERICK RBI System."],
+      ["Please go to the 'DATA' sheet (Sheet 2) to view the records."]
+  ];
+  const wsInstructions = XLSX.utils.aoa_to_sheet(instructionData);
+  XLSX.utils.book_append_sheet(wb, wsInstructions, "INSTRUCTIONS");
+
+  // SHEET 2: DATA (The important one)
+  // Combine Headers + All Records
+  const allData = [HEADERS, ...records];
+  const wsData = XLSX.utils.aoa_to_sheet(allData);
+  
+  // Auto-adjust column width slightly for readability
+  const wscols = HEADERS.map(h => ({wch: h.length + 5}));
+  wsData['!cols'] = wscols;
+
+  XLSX.utils.book_append_sheet(wb, wsData, "DATA");
+
+  // Download
+  const dateStr = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `RBI_Export_${dateStr}.xlsx`);
+}
+
+function openDrive(){
+    let driveLink = localStorage.getItem('rbiDriveLink');
+    if(!driveLink){
+        driveLink = prompt("Paste your Google Drive Folder Link here:");
+        if(driveLink) localStorage.setItem('rbiDriveLink', driveLink);
+    }
+    if(driveLink) window.open(driveLink, '_blank');
+}
+
+function shareData(){
+    if (navigator.share) {
+        navigator.share({
+            title: 'RBI System',
+            text: `RBI System Update: ${records.length} records stored.`,
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        alert(`Share not supported. Records: ${records.length}`);
+    }
+}
+
+renderList();
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('PWA Service Worker Registered'))
+      .catch(err => console.log('Service Worker Registration Failed', err));
+  });
+}
+</script>
+</body>
+</html>
